@@ -22,7 +22,7 @@ async function run(): Promise<void> {
 
     // Get the event context
     const context = github.context
-    
+
     // Create the Octokit client
     const octokit = github.getOctokit(process.env.GITHUB_TOKEN!)
 
@@ -73,7 +73,12 @@ async function run(): Promise<void> {
 
     // Get the Inbox column ID
     // This is an option in the `Status` single-select field option
-    const fieldId = await getNodeId(TYPES.FIELD, owner, repository, projectNumber)
+    const fieldId = await getNodeId(
+      TYPES.FIELD,
+      owner,
+      repository,
+      projectNumber
+    )
     const optionId = getNodeId(TYPES.OPTION, owner, repository, 'Inbox')
     core.info(`Status Field ID: ${fieldId}`)
     core.info(`Status Option ID: ${optionId}`)
