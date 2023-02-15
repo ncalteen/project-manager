@@ -214,7 +214,7 @@ function getNodeId(type, owner, repository, id) {
                 response = yield octokit.graphql({
                     query: `
           query ($owner: String!, $id: Int!) {
-            user(login: $owner) {
+            organization(login: $owner) {
               projectV2(number: $id) {
                 id
               }
@@ -253,7 +253,7 @@ function getNodeId(type, owner, repository, id) {
                 response = yield octokit.graphql({
                     query: `
           query ($owner: String!, $projectNumber: Int!) {
-            user(login: $owner) {
+            organization(login: $owner) {
               projectV2(number: $projectNumber) {
                 field(name: "Status") {
                   ... on ProjectV2SingleSelectField {
@@ -277,7 +277,7 @@ function getNodeId(type, owner, repository, id) {
                 response = yield octokit.graphql({
                     query: `
           query ($owner: String!, $projectNumber: Int!) {
-            user(login: $owner) {
+            organization(login: $owner) {
               projectV2(number: $projectNumber) {
                 field(name: "Status") {
                   ... on ProjectV2SingleSelectField {
