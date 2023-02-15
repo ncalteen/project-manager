@@ -8,6 +8,12 @@ created:
 
 ## Inputs
 
+### `token`
+
+**Required** (String) The GitHub token to use for authentication.
+
+_Example:_ `${{ secrets.GITHUB_TOKEN }}`
+
 ### `projectId`
 
 **Required** (Number) The ID of the project to manage.
