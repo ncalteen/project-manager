@@ -1,22 +1,16 @@
 import * as core from '@actions/core'
 import {getOctokit} from '@actions/github'
-import {graphql} from '@octokit/graphql'
 
 // The types of nodes that can be queried
 enum TYPES {
+  FIELD,
   ISSUE,
+  OPTION,
   PROJECT,
-  PULL_REQUEST,
   USER
 }
 
 const octokit = getOctokit(process.env.GITHUB_TOKEN!)
-
-const client = graphql.defaults({
-  headers: {
-    authorization: `token ${process.env.GITHUB_TOKEN}`
-  }
-})
 
 /** Get the global ID of a node via REST
  * @param {TYPES} type - The type of the node
@@ -33,7 +27,7 @@ async function getNodeId(
   switch (type) {
     case TYPES.PROJECT:
       // Get the ProjectV2 ID from the GraphQL API
-      response = await client({
+      response = await octokit.graphql({
         query: `
           query ($owner: String!, $id: Int!) {
             user(login: $owner) {
@@ -60,6 +54,76 @@ async function getNodeId(
           id
         })
       ).data.node_id
+    case TYPES.ISSUE:
+      // Get the issue's global ID from the REST API
+      return (
+        await octokit.request('GET /repos/:owner/:repo/issues/:id', {
+          owner,
+          repo: repository,
+          id
+        })
+      ).data.node_id
+    case TYPES.FIELD:
+      // Get the field's global ID from the GraphQL API
+      response = await octokit.graphql({
+        query: `
+          query ($owner: String!, $projectNumber: Int!) {
+            user(login: $owner) {
+              projectV2(number: $projectNumber) {
+                field(name: "Status") {
+                  ... on ProjectV2SingleSelectField {
+                    id
+                  }
+                }
+              }
+            }
+          }
+        `,
+        owner,
+        projectNumber: id
+      })
+
+      if (response.errors) {
+        core.error(response.errors)
+        throw new Error('Get Field ID Error!')
+      }
+
+      return response.user.projectV2.field.id
+    case TYPES.OPTION:
+      // Get the options's global ID from the GraphQL API
+      response = await octokit.graphql({
+        query: `
+          query ($owner: String!, $projectNumber: Int!) {
+            user(login: $owner) {
+              projectV2(number: $projectNumber) {
+                field(name: "Status") {
+                  ... on ProjectV2SingleSelectField {
+                    options {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `,
+        owner,
+        projectNumber: id
+      })
+
+      if (response.errors) {
+        core.error(response.errors)
+        throw new Error('Get Option ID Error!')
+      }
+
+      for (const element of response.user.projectV2.field.options) {
+        if (element.name.includes(id)) {
+          return element.id
+        }
+      }
+
+      throw new Error('No Option ID Found!')
     default:
       throw new Error('Invalid type')
   }
