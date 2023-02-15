@@ -48,7 +48,7 @@ function run() {
         try {
             core.info(JSON.stringify(github.context.payload));
             // Get the action inputs
-            const projectNumber = core.getInput('projectNumber');
+            const projectNumber = core.getInput('projectNumber').toString();
             const owner = core.getInput('owner');
             const repository = core.getInput('repository');
             const username = core.getInput('username');
@@ -67,7 +67,7 @@ function run() {
             const userId = yield (0, utils_1.getNodeId)(utils_1.TYPES.USER, owner, repository, username);
             core.info(`User ID: ${userId}`);
             // New issue created
-            const issueNumber = context.issue.number;
+            const issueNumber = context.issue.number.toString();
             // Get the issue's global ID
             const issueId = yield (0, utils_1.getNodeId)(utils_1.TYPES.ISSUE, owner, repository, issueNumber);
             core.info(`Issue ID: ${issueId}`);
@@ -198,16 +198,8 @@ const octokit = github.getOctokit(core.getInput('token'));
 function getNodeId(type, owner, repository, id) {
     return __awaiter(this, void 0, void 0, function* () {
         let response;
-        let projectNumber;
         switch (type) {
             case TYPES.PROJECT:
-                // Get the right type of ID for the GraphQL API
-                if (typeof id === 'string') {
-                    projectNumber = parseInt(id);
-                }
-                else {
-                    projectNumber = id;
-                }
                 // Get the ProjectV2 ID from the GraphQL API
                 response = yield octokit.graphql({
                     query: `
@@ -220,7 +212,7 @@ function getNodeId(type, owner, repository, id) {
           }
         `,
                     owner,
-                    id: projectNumber
+                    id
                 });
                 if (response.errors) {
                     core.error(response.errors);
@@ -240,13 +232,6 @@ function getNodeId(type, owner, repository, id) {
                     id
                 })).data.node_id;
             case TYPES.FIELD:
-                // Get the right type of ID for the GraphQL API
-                if (typeof id === 'string') {
-                    projectNumber = parseInt(id);
-                }
-                else {
-                    projectNumber = id;
-                }
                 // Get the field's global ID from the GraphQL API
                 response = yield octokit.graphql({
                     query: `

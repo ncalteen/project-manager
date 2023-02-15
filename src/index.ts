@@ -10,7 +10,7 @@ async function run(): Promise<void> {
     core.info(JSON.stringify(github.context.payload))
 
     // Get the action inputs
-    const projectNumber = core.getInput('projectNumber')
+    const projectNumber = core.getInput('projectNumber').toString()
     const owner = core.getInput('owner')
     const repository = core.getInput('repository')
     const username = core.getInput('username')
@@ -40,7 +40,7 @@ async function run(): Promise<void> {
     core.info(`User ID: ${userId}`)
 
     // New issue created
-    const issueNumber = context.issue.number
+    const issueNumber = context.issue.number.toString()
 
     // Get the issue's global ID
     const issueId = await getNodeId(TYPES.ISSUE, owner, repository, issueNumber)
