@@ -24,7 +24,7 @@ async function run(): Promise<void> {
     const context = github.context
 
     // Create the Octokit client
-    const octokit = github.getOctokit(process.env.GITHUB_TOKEN!)
+    const octokit = github.getOctokit(core.getInput('token'))
 
     // Get the project's global ID
     const projectId = await getNodeId(

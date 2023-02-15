@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import {getOctokit} from '@actions/github'
+import * as github from '@actions/github'
 
 // The types of nodes that can be queried
 enum TYPES {
@@ -10,7 +10,7 @@ enum TYPES {
   USER
 }
 
-const octokit = getOctokit(process.env.GITHUB_TOKEN!)
+const octokit = github.getOctokit(core.getInput('token'))
 
 /** Get the global ID of a node via REST
  * @param {TYPES} type - The type of the node

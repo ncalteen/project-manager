@@ -59,7 +59,7 @@ function run() {
             // Get the event context
             const context = github.context;
             // Create the Octokit client
-            const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
+            const octokit = github.getOctokit(core.getInput('token'));
             // Get the project's global ID
             const projectId = yield (0, utils_1.getNodeId)(utils_1.TYPES.PROJECT, owner, repository, projectNumber);
             core.info(`Project ID: ${projectId}`);
@@ -179,7 +179,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TYPES = exports.getNodeId = void 0;
 const core = __importStar(__nccwpck_require__(1401));
-const github_1 = __nccwpck_require__(2215);
+const github = __importStar(__nccwpck_require__(2215));
 // The types of nodes that can be queried
 var TYPES;
 (function (TYPES) {
@@ -190,7 +190,7 @@ var TYPES;
     TYPES[TYPES["USER"] = 4] = "USER";
 })(TYPES || (TYPES = {}));
 exports.TYPES = TYPES;
-const octokit = (0, github_1.getOctokit)(process.env.GITHUB_TOKEN);
+const octokit = github.getOctokit(core.getInput('token'));
 /** Get the global ID of a node via REST
  * @param {TYPES} type - The type of the node
  * @param {string} id - The ID of the node
