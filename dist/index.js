@@ -199,8 +199,6 @@ function getNodeId(type, owner, repository, id) {
     return __awaiter(this, void 0, void 0, function* () {
         let response;
         let projectNumber;
-        core.info(`Getting global ID for ${type} with ID ${id}`);
-        core.info(`Type of ID: ${typeof id}`);
         switch (type) {
             case TYPES.PROJECT:
                 // Get the right type of ID for the GraphQL API
