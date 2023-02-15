@@ -198,10 +198,18 @@ const octokit = github.getOctokit(core.getInput('token'));
 function getNodeId(type, owner, repository, id) {
     return __awaiter(this, void 0, void 0, function* () {
         let response;
+        let projectNumber;
         core.info(`Getting global ID for ${type} with ID ${id}`);
         core.info(`Type of ID: ${typeof id}`);
         switch (type) {
             case TYPES.PROJECT:
+                // Get the right type of ID for the GraphQL API
+                if (typeof id === 'string') {
+                    projectNumber = parseInt(id);
+                }
+                else {
+                    projectNumber = id;
+                }
                 // Get the ProjectV2 ID from the GraphQL API
                 response = yield octokit.graphql({
                     query: `
@@ -214,7 +222,7 @@ function getNodeId(type, owner, repository, id) {
           }
         `,
                     owner,
-                    id
+                    id: projectNumber
                 });
                 if (response.errors) {
                     core.error(response.errors);
@@ -234,6 +242,13 @@ function getNodeId(type, owner, repository, id) {
                     id
                 })).data.node_id;
             case TYPES.FIELD:
+                // Get the right type of ID for the GraphQL API
+                if (typeof id === 'string') {
+                    projectNumber = parseInt(id);
+                }
+                else {
+                    projectNumber = id;
+                }
                 // Get the field's global ID from the GraphQL API
                 response = yield octokit.graphql({
                     query: `

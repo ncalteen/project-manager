@@ -23,12 +23,20 @@ async function getNodeId(
   id: number | string
 ): Promise<string> {
   let response: any
+  let projectNumber: number
 
   core.info(`Getting global ID for ${type} with ID ${id}`)
   core.info(`Type of ID: ${typeof id}`)
 
   switch (type) {
     case TYPES.PROJECT:
+      // Get the right type of ID for the GraphQL API
+      if (typeof id === 'string') {
+        projectNumber = parseInt(id)
+      } else {
+        projectNumber = id
+      }
+
       // Get the ProjectV2 ID from the GraphQL API
       response = await octokit.graphql({
         query: `
@@ -41,7 +49,7 @@ async function getNodeId(
           }
         `,
         owner,
-        id
+        id: projectNumber
       })
 
       if (response.errors) {
@@ -67,6 +75,13 @@ async function getNodeId(
         })
       ).data.node_id
     case TYPES.FIELD:
+      // Get the right type of ID for the GraphQL API
+      if (typeof id === 'string') {
+        projectNumber = parseInt(id)
+      } else {
+        projectNumber = id
+      }
+
       // Get the field's global ID from the GraphQL API
       response = await octokit.graphql({
         query: `
