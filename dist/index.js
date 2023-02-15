@@ -1,6 +1,302 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 5766:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core = __importStar(__nccwpck_require__(1401));
+const github = __importStar(__nccwpck_require__(2215));
+const utils_1 = __nccwpck_require__(1869);
+function run() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let response;
+        try {
+            core.info(JSON.stringify(github.context.payload));
+            // Get the action inputs
+            const projectNumber = core.getInput('projectNumber');
+            const owner = core.getInput('owner');
+            const repository = core.getInput('repository');
+            const username = core.getInput('username');
+            // Log inputs
+            core.info(`Project: ${projectNumber}`);
+            core.info(`Repository: ${owner}/${repository}`);
+            core.info(`Username: ${username}`);
+            // Get the event context
+            const context = github.context;
+            // Create the Octokit client
+            const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
+            // Get the project's global ID
+            const projectId = yield (0, utils_1.getNodeId)(utils_1.TYPES.PROJECT, owner, repository, projectNumber);
+            core.info(`Project ID: ${projectId}`);
+            // Get the user's global ID
+            const userId = yield (0, utils_1.getNodeId)(utils_1.TYPES.USER, owner, repository, username);
+            core.info(`User ID: ${userId}`);
+            // New issue created
+            const issueNumber = context.issue.number;
+            // Get the issue's global ID
+            const issueId = yield (0, utils_1.getNodeId)(utils_1.TYPES.ISSUE, owner, repository, issueNumber);
+            core.info(`Issue ID: ${issueId}`);
+            // Add it to the project
+            response = yield octokit.graphql({
+                query: `
+        mutation ($projectId: ID!, $issueId: ID!) {
+          addProjectV2ItemById(input: {projectId: $projectId, contentId: $issueId}) {
+            item {
+              id
+              type
+            }
+          }
+        }
+      `,
+                projectId,
+                issueId
+            });
+            if (response.errors) {
+                core.error(response.errors);
+                throw new Error('Add Issue to Project Error!');
+            }
+            // Adding the issue generates an item ID
+            const itemId = response.addProjectV2ItemById.item.id;
+            core.info(`Item ID: ${itemId}`);
+            // Get the Inbox column ID
+            // This is an option in the `Status` single-select field option
+            const fieldId = yield (0, utils_1.getNodeId)(utils_1.TYPES.FIELD, owner, repository, projectNumber);
+            const optionId = (0, utils_1.getNodeId)(utils_1.TYPES.OPTION, owner, repository, 'Inbox');
+            core.info(`Status Field ID: ${fieldId}`);
+            core.info(`Status Option ID: ${optionId}`);
+            // Move the item to the Inbox column
+            response = octokit.graphql({
+                query: `
+        mutation ($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+          updateProjectV2ItemFieldValue(input: {
+            projectId: $projectId,
+            itemId: $itemId,
+            fieldId: $fieldId,
+            value: {
+                singleSelectOptionId: $optionId
+            }
+          })
+          {
+            projectV2Item {
+              id
+            }
+          }
+        }
+      `,
+                projectId,
+                itemId,
+                fieldId,
+                optionId
+            });
+            if (response.errors) {
+                // Something went wrong...
+                core.error(response.errors);
+                throw new Error('Move Issue To Inbox Error!');
+            }
+        }
+        catch (error) {
+            core.setFailed(error.message);
+        }
+    });
+}
+run();
+
+
+/***/ }),
+
+/***/ 1869:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TYPES = exports.getNodeId = void 0;
+const core = __importStar(__nccwpck_require__(1401));
+const github_1 = __nccwpck_require__(2215);
+// The types of nodes that can be queried
+var TYPES;
+(function (TYPES) {
+    TYPES[TYPES["FIELD"] = 0] = "FIELD";
+    TYPES[TYPES["ISSUE"] = 1] = "ISSUE";
+    TYPES[TYPES["OPTION"] = 2] = "OPTION";
+    TYPES[TYPES["PROJECT"] = 3] = "PROJECT";
+    TYPES[TYPES["USER"] = 4] = "USER";
+})(TYPES || (TYPES = {}));
+exports.TYPES = TYPES;
+const octokit = (0, github_1.getOctokit)(process.env.GITHUB_TOKEN);
+/** Get the global ID of a node via REST
+ * @param {TYPES} type - The type of the node
+ * @param {string} id - The ID of the node
+ */
+function getNodeId(type, owner, repository, id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let response;
+        switch (type) {
+            case TYPES.PROJECT:
+                // Get the ProjectV2 ID from the GraphQL API
+                response = yield octokit.graphql({
+                    query: `
+          query ($owner: String!, $id: Int!) {
+            user(login: $owner) {
+              projectV2(number: $id) {
+                id
+              }
+            }
+          }
+        `,
+                    owner,
+                    id
+                });
+                if (response.errors) {
+                    core.error(response.errors);
+                    throw new Error('Get Project ID Error!');
+                }
+                return response.user.projectV2.id;
+            case TYPES.USER:
+                // Get the user's global ID from the REST API
+                return (yield octokit.request('GET /users/:id', {
+                    id
+                })).data.node_id;
+            case TYPES.ISSUE:
+                // Get the issue's global ID from the REST API
+                return (yield octokit.request('GET /repos/:owner/:repo/issues/:id', {
+                    owner,
+                    repo: repository,
+                    id
+                })).data.node_id;
+            case TYPES.FIELD:
+                // Get the field's global ID from the GraphQL API
+                response = yield octokit.graphql({
+                    query: `
+          query ($owner: String!, $projectNumber: Int!) {
+            user(login: $owner) {
+              projectV2(number: $projectNumber) {
+                field(name: "Status") {
+                  ... on ProjectV2SingleSelectField {
+                    id
+                  }
+                }
+              }
+            }
+          }
+        `,
+                    owner,
+                    projectNumber: id
+                });
+                if (response.errors) {
+                    core.error(response.errors);
+                    throw new Error('Get Field ID Error!');
+                }
+                return response.user.projectV2.field.id;
+            case TYPES.OPTION:
+                // Get the options's global ID from the GraphQL API
+                response = yield octokit.graphql({
+                    query: `
+          query ($owner: String!, $projectNumber: Int!) {
+            user(login: $owner) {
+              projectV2(number: $projectNumber) {
+                field(name: "Status") {
+                  ... on ProjectV2SingleSelectField {
+                    options {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `,
+                    owner,
+                    projectNumber: id
+                });
+                if (response.errors) {
+                    core.error(response.errors);
+                    throw new Error('Get Option ID Error!');
+                }
+                for (const element of response.user.projectV2.field.options) {
+                    if (element.name.includes(id)) {
+                        return element.id;
+                    }
+                }
+                throw new Error('No Option ID Found!');
+            default:
+                throw new Error('Invalid type');
+        }
+    });
+}
+exports.getNodeId = getNodeId;
+
+
+/***/ }),
+
 /***/ 3591:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -9597,302 +9893,6 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 216:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(1401));
-const github = __importStar(__nccwpck_require__(2215));
-const utils_1 = __nccwpck_require__(719);
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        let response;
-        try {
-            core.info(JSON.stringify(github.context.payload));
-            // Get the action inputs
-            const projectNumber = core.getInput('projectNumber');
-            const owner = core.getInput('owner');
-            const repository = core.getInput('repository');
-            const username = core.getInput('username');
-            // Log inputs
-            core.info(`Project: ${projectNumber}`);
-            core.info(`Repository: ${owner}/${repository}`);
-            core.info(`Username: ${username}`);
-            // Get the event context
-            const context = github.context;
-            // Create the Octokit client
-            const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
-            // Get the project's global ID
-            const projectId = yield (0, utils_1.getNodeId)(utils_1.TYPES.PROJECT, owner, repository, projectNumber);
-            core.info(`Project ID: ${projectId}`);
-            // Get the user's global ID
-            const userId = yield (0, utils_1.getNodeId)(utils_1.TYPES.USER, owner, repository, username);
-            core.info(`User ID: ${userId}`);
-            // New issue created
-            const issueNumber = context.issue.number;
-            // Get the issue's global ID
-            const issueId = yield (0, utils_1.getNodeId)(utils_1.TYPES.ISSUE, owner, repository, issueNumber);
-            core.info(`Issue ID: ${issueId}`);
-            // Add it to the project
-            response = yield octokit.graphql({
-                query: `
-        mutation ($projectId: ID!, $issueId: ID!) {
-          addProjectV2ItemById(input: {projectId: $projectId, contentId: $issueId}) {
-            item {
-              id
-              type
-            }
-          }
-        }
-      `,
-                projectId,
-                issueId
-            });
-            if (response.errors) {
-                core.error(response.errors);
-                throw new Error('Add Issue to Project Error!');
-            }
-            // Adding the issue generates an item ID
-            const itemId = response.addProjectV2ItemById.item.id;
-            core.info(`Item ID: ${itemId}`);
-            // Get the Inbox column ID
-            // This is an option in the `Status` single-select field option
-            const fieldId = yield (0, utils_1.getNodeId)(utils_1.TYPES.FIELD, owner, repository, projectNumber);
-            const optionId = (0, utils_1.getNodeId)(utils_1.TYPES.OPTION, owner, repository, 'Inbox');
-            core.info(`Status Field ID: ${fieldId}`);
-            core.info(`Status Option ID: ${optionId}`);
-            // Move the item to the Inbox column
-            response = octokit.graphql({
-                query: `
-        mutation ($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
-          updateProjectV2ItemFieldValue(input: {
-            projectId: $projectId,
-            itemId: $itemId,
-            fieldId: $fieldId,
-            value: {
-                singleSelectOptionId: $optionId
-            }
-          })
-          {
-            projectV2Item {
-              id
-            }
-          }
-        }
-      `,
-                projectId,
-                itemId,
-                fieldId,
-                optionId
-            });
-            if (response.errors) {
-                // Something went wrong...
-                core.error(response.errors);
-                throw new Error('Move Issue To Inbox Error!');
-            }
-        }
-        catch (error) {
-            core.setFailed(error.message);
-        }
-    });
-}
-run();
-
-
-/***/ }),
-
-/***/ 719:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TYPES = exports.getNodeId = void 0;
-const core = __importStar(__nccwpck_require__(1401));
-const github_1 = __nccwpck_require__(2215);
-// The types of nodes that can be queried
-var TYPES;
-(function (TYPES) {
-    TYPES[TYPES["FIELD"] = 0] = "FIELD";
-    TYPES[TYPES["ISSUE"] = 1] = "ISSUE";
-    TYPES[TYPES["OPTION"] = 2] = "OPTION";
-    TYPES[TYPES["PROJECT"] = 3] = "PROJECT";
-    TYPES[TYPES["USER"] = 4] = "USER";
-})(TYPES || (TYPES = {}));
-exports.TYPES = TYPES;
-const octokit = (0, github_1.getOctokit)(process.env.GITHUB_TOKEN);
-/** Get the global ID of a node via REST
- * @param {TYPES} type - The type of the node
- * @param {string} id - The ID of the node
- */
-function getNodeId(type, owner, repository, id) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let response;
-        switch (type) {
-            case TYPES.PROJECT:
-                // Get the ProjectV2 ID from the GraphQL API
-                response = yield octokit.graphql({
-                    query: `
-          query ($owner: String!, $id: Int!) {
-            user(login: $owner) {
-              projectV2(number: $id) {
-                id
-              }
-            }
-          }
-        `,
-                    owner,
-                    id
-                });
-                if (response.errors) {
-                    core.error(response.errors);
-                    throw new Error('Get Project ID Error!');
-                }
-                return response.user.projectV2.id;
-            case TYPES.USER:
-                // Get the user's global ID from the REST API
-                return (yield octokit.request('GET /users/:id', {
-                    id
-                })).data.node_id;
-            case TYPES.ISSUE:
-                // Get the issue's global ID from the REST API
-                return (yield octokit.request('GET /repos/:owner/:repo/issues/:id', {
-                    owner,
-                    repo: repository,
-                    id
-                })).data.node_id;
-            case TYPES.FIELD:
-                // Get the field's global ID from the GraphQL API
-                response = yield octokit.graphql({
-                    query: `
-          query ($owner: String!, $projectNumber: Int!) {
-            user(login: $owner) {
-              projectV2(number: $projectNumber) {
-                field(name: "Status") {
-                  ... on ProjectV2SingleSelectField {
-                    id
-                  }
-                }
-              }
-            }
-          }
-        `,
-                    owner,
-                    projectNumber: id
-                });
-                if (response.errors) {
-                    core.error(response.errors);
-                    throw new Error('Get Field ID Error!');
-                }
-                return response.user.projectV2.field.id;
-            case TYPES.OPTION:
-                // Get the options's global ID from the GraphQL API
-                response = yield octokit.graphql({
-                    query: `
-          query ($owner: String!, $projectNumber: Int!) {
-            user(login: $owner) {
-              projectV2(number: $projectNumber) {
-                field(name: "Status") {
-                  ... on ProjectV2SingleSelectField {
-                    options {
-                      id
-                      name
-                    }
-                  }
-                }
-              }
-            }
-          }
-        `,
-                    owner,
-                    projectNumber: id
-                });
-                if (response.errors) {
-                    core.error(response.errors);
-                    throw new Error('Get Option ID Error!');
-                }
-                for (const element of response.user.projectV2.field.options) {
-                    if (element.name.includes(id)) {
-                        return element.id;
-                    }
-                }
-                throw new Error('No Option ID Found!');
-            default:
-                throw new Error('Invalid type');
-        }
-    });
-}
-exports.getNodeId = getNodeId;
-
-
-/***/ }),
-
 /***/ 467:
 /***/ ((module) => {
 
@@ -10071,7 +10071,7 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(216);
+/******/ 	var __webpack_exports__ = __nccwpck_require__(5766);
 /******/ 	module.exports = __webpack_exports__;
 /******/ 	
 /******/ })()
