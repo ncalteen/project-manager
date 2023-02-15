@@ -24,6 +24,9 @@ async function getNodeId(
 ): Promise<string> {
   let response: any
 
+  core.info(`Getting global ID for ${type} with ID ${id}`)
+  core.info(`Type of ID: ${typeof id}`)
+
   switch (type) {
     case TYPES.PROJECT:
       // Get the ProjectV2 ID from the GraphQL API
