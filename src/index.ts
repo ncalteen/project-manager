@@ -131,6 +131,29 @@ async function run(): Promise<void> {
       core.error(response.errors)
       throw new Error('Move Issue To Inbox Error!')
     }
+
+    // Assign the issue to the user
+    response = await octokit.graphql({
+      query: `
+        mutation ($issueId: ID!, $userId: ID!) {
+          addAssigneesToAssignable(input: {assignableId: $issueId, assigneeIds: [$userId]}) {
+            assignable {
+              ... on Issue {
+                number
+              }
+            }
+          }
+        }
+      `,
+      issueId,
+      userId
+    })
+
+    if (response.errors) {
+      // Something went wrong...
+      core.error(response.errors)
+      throw new Error('Assign Issue to User Error!')
+    }
   } catch (error: any) {
     core.setFailed(error.message)
   }

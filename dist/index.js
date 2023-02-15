@@ -127,6 +127,27 @@ function run() {
                 core.error(response.errors);
                 throw new Error('Move Issue To Inbox Error!');
             }
+            // Assign the issue to the user
+            response = yield octokit.graphql({
+                query: `
+        mutation ($issueId: ID!, $userId: ID!) {
+          addAssigneesToAssignable(input: {assignableId: $issueId, assigneeIds: [$userId]}) {
+            assignable {
+              ... on Issue {
+                number
+              }
+            }
+          }
+        }
+      `,
+                issueId,
+                userId
+            });
+            if (response.errors) {
+                // Something went wrong...
+                core.error(response.errors);
+                throw new Error('Assign Issue to User Error!');
+            }
         }
         catch (error) {
             core.setFailed(error.message);
@@ -197,8 +218,6 @@ const octokit = github.getOctokit(core.getInput('token'));
 function getNodeId(type, owner, repository, projectNumber, id) {
     return __awaiter(this, void 0, void 0, function* () {
         let response;
-        core.info(`Getting ID for ${type} ${id}...`);
-        core.info(`Type: ${typeof id}`);
         switch (type) {
             case TYPES.PROJECT:
                 // Get the ProjectV2 ID from the GraphQL API
