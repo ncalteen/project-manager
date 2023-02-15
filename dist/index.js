@@ -96,7 +96,7 @@ function run() {
             // Get the Inbox column ID
             // This is an option in the `Status` single-select field option
             const fieldId = yield (0, utils_1.getNodeId)(utils_1.TYPES.FIELD, owner, repository, projectNumber);
-            const optionId = (0, utils_1.getNodeId)(utils_1.TYPES.OPTION, owner, repository, 'Inbox');
+            const optionId = yield (0, utils_1.getNodeId)(utils_1.TYPES.OPTION, owner, repository, 'Inbox');
             core.info(`Status Field ID: ${fieldId}`);
             core.info(`Status Option ID: ${optionId}`);
             // Move the item to the Inbox column
@@ -214,7 +214,7 @@ function getNodeId(type, owner, repository, id) {
           }
         `,
                     owner,
-                    id: (typeof id === 'string') ? parseInt(id) : id
+                    id: typeof id === 'string' ? parseInt(id) : id
                 });
                 if (response.errors) {
                     core.error(response.errors);
@@ -250,7 +250,7 @@ function getNodeId(type, owner, repository, id) {
           }
         `,
                     owner,
-                    id: (typeof id === 'string') ? parseInt(id) : id
+                    id: typeof id === 'string' ? parseInt(id) : id
                 });
                 if (response.errors) {
                     core.error(response.errors);
@@ -277,7 +277,7 @@ function getNodeId(type, owner, repository, id) {
           }
         `,
                     owner,
-                    id: (typeof id === 'string') ? parseInt(id) : id
+                    id: typeof id === 'string' ? parseInt(id) : id
                 });
                 if (response.errors) {
                     core.error(response.errors);

@@ -79,7 +79,7 @@ async function run(): Promise<void> {
       repository,
       projectNumber
     )
-    const optionId = getNodeId(TYPES.OPTION, owner, repository, 'Inbox')
+    const optionId = await getNodeId(TYPES.OPTION, owner, repository, 'Inbox')
     core.info(`Status Field ID: ${fieldId}`)
     core.info(`Status Option ID: ${optionId}`)
 
