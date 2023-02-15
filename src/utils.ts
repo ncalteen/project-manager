@@ -41,7 +41,7 @@ async function getNodeId(
           }
         `,
         owner,
-        id
+        id: typeof id === 'string' ? parseInt(id) : id
       })
 
       if (response.errors) {
@@ -83,7 +83,7 @@ async function getNodeId(
           }
         `,
         owner,
-        id
+        id: typeof id === 'string' ? parseInt(id) : id
       })
 
       if (response.errors) {
@@ -112,7 +112,7 @@ async function getNodeId(
           }
         `,
         owner,
-        id
+        id: typeof id === 'string' ? parseInt(id) : id
       })
 
       if (response.errors) {

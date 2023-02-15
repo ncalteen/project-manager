@@ -214,7 +214,7 @@ function getNodeId(type, owner, repository, id) {
           }
         `,
                     owner,
-                    id
+                    id: (typeof id === 'string') ? parseInt(id) : id
                 });
                 if (response.errors) {
                     core.error(response.errors);
@@ -250,7 +250,7 @@ function getNodeId(type, owner, repository, id) {
           }
         `,
                     owner,
-                    id
+                    id: (typeof id === 'string') ? parseInt(id) : id
                 });
                 if (response.errors) {
                     core.error(response.errors);
@@ -277,7 +277,7 @@ function getNodeId(type, owner, repository, id) {
           }
         `,
                     owner,
-                    id
+                    id: (typeof id === 'string') ? parseInt(id) : id
                 });
                 if (response.errors) {
                     core.error(response.errors);
