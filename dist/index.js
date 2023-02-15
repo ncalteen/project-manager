@@ -226,7 +226,7 @@ function getNodeId(type, owner, repository, id) {
                     core.error(response.errors);
                     throw new Error('Get Project ID Error!');
                 }
-                return response.user.projectV2.id;
+                return response.organization.projectV2.id;
             case TYPES.USER:
                 // Get the user's global ID from the REST API
                 return (yield octokit.request('GET /users/:id', {
@@ -269,7 +269,7 @@ function getNodeId(type, owner, repository, id) {
                     core.error(response.errors);
                     throw new Error('Get Field ID Error!');
                 }
-                return response.user.projectV2.field.id;
+                return response.organization.projectV2.field.id;
             case TYPES.OPTION:
                 // Get the options's global ID from the GraphQL API
                 response = yield octokit.graphql({
@@ -296,7 +296,7 @@ function getNodeId(type, owner, repository, id) {
                     core.error(response.errors);
                     throw new Error('Get Option ID Error!');
                 }
-                for (const element of response.user.projectV2.field.options) {
+                for (const element of response.organization.projectV2.field.options) {
                     if (element.name.includes(id)) {
                         return element.id;
                     }

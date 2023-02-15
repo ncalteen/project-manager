@@ -54,7 +54,7 @@ async function getNodeId(
         throw new Error('Get Project ID Error!')
       }
 
-      return response.user.projectV2.id
+      return response.organization.projectV2.id
     case TYPES.USER:
       // Get the user's global ID from the REST API
       return (
@@ -103,7 +103,7 @@ async function getNodeId(
         throw new Error('Get Field ID Error!')
       }
 
-      return response.user.projectV2.field.id
+      return response.organization.projectV2.field.id
     case TYPES.OPTION:
       // Get the options's global ID from the GraphQL API
       response = await octokit.graphql({
@@ -132,7 +132,7 @@ async function getNodeId(
         throw new Error('Get Option ID Error!')
       }
 
-      for (const element of response.user.projectV2.field.options) {
+      for (const element of response.organization.projectV2.field.options) {
         if (element.name.includes(id)) {
           return element.id
         }
