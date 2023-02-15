@@ -20,7 +20,7 @@ async function getNodeId(
   type: TYPES,
   owner: string,
   repository: string,
-  id: string
+  id: string | number
 ): Promise<string> {
   let response: any
 
@@ -67,9 +67,9 @@ async function getNodeId(
       // Get the field's global ID from the GraphQL API
       response = await octokit.graphql({
         query: `
-          query ($owner: String!, $projectNumber: Int!) {
+          query ($owner: String!, $id: Int!) {
             organization(login: $owner) {
-              projectV2(number: $projectNumber) {
+              projectV2(number: $id) {
                 field(name: "Status") {
                   ... on ProjectV2SingleSelectField {
                     id
@@ -80,7 +80,7 @@ async function getNodeId(
           }
         `,
         owner,
-        projectNumber: id
+        id
       })
 
       if (response.errors) {
@@ -93,9 +93,9 @@ async function getNodeId(
       // Get the options's global ID from the GraphQL API
       response = await octokit.graphql({
         query: `
-          query ($owner: String!, $projectNumber: Int!) {
+          query ($owner: String!, $id: Int!) {
             organization(login: $owner) {
-              projectV2(number: $projectNumber) {
+              projectV2(number: $id) {
                 field(name: "Status") {
                   ... on ProjectV2SingleSelectField {
                     options {
@@ -109,7 +109,7 @@ async function getNodeId(
           }
         `,
         owner,
-        projectNumber: id
+        id
       })
 
       if (response.errors) {
