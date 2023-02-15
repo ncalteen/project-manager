@@ -1,5 +1,8 @@
 name: 'Personal Project Manager'
 description: 'Converts ProjectV2 cards to issues and assigns to a user account.'
+branding:
+  icon: book
+  color: blue
 
 inputs:
   token:
