@@ -20,6 +20,7 @@ async function getNodeId(
   type: TYPES,
   owner: string,
   repository: string,
+  projectNumber: number,
   id: string | number
 ): Promise<string> {
   let response: any
@@ -32,16 +33,16 @@ async function getNodeId(
       // Get the ProjectV2 ID from the GraphQL API
       response = await octokit.graphql({
         query: `
-          query ($owner: String!, $id: Int!) {
+          query ($owner: String!, $projectNumber: Int!) {
             organization(login: $owner) {
-              projectV2(number: $id) {
+              projectV2(number: $projectNumber) {
                 id
               }
             }
           }
         `,
         owner,
-        id: typeof id === 'string' ? parseInt(id) : id
+        projectNumber
       })
 
       if (response.errors) {
@@ -70,9 +71,9 @@ async function getNodeId(
       // Get the field's global ID from the GraphQL API
       response = await octokit.graphql({
         query: `
-          query ($owner: String!, $id: Int!) {
+          query ($owner: String!, $projectNumber: Int!) {
             organization(login: $owner) {
-              projectV2(number: $id) {
+              projectV2(number: $projectNumber) {
                 field(name: "Status") {
                   ... on ProjectV2SingleSelectField {
                     id
@@ -83,7 +84,7 @@ async function getNodeId(
           }
         `,
         owner,
-        id: typeof id === 'string' ? parseInt(id) : id
+        projectNumber
       })
 
       if (response.errors) {
@@ -96,9 +97,9 @@ async function getNodeId(
       // Get the options's global ID from the GraphQL API
       response = await octokit.graphql({
         query: `
-          query ($owner: String!, $id: Int!) {
+          query ($owner: String!, $projectNumber: Int!) {
             organization(login: $owner) {
-              projectV2(number: $id) {
+              projectV2(number: $projectNumber) {
                 field(name: "Status") {
                   ... on ProjectV2SingleSelectField {
                     options {
@@ -112,7 +113,7 @@ async function getNodeId(
           }
         `,
         owner,
-        id: typeof id === 'string' ? parseInt(id) : id
+        projectNumber
       })
 
       if (response.errors) {

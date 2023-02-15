@@ -46,9 +46,8 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         let response;
         try {
-            core.info(JSON.stringify(github.context.payload));
             // Get the action inputs
-            const projectNumber = core.getInput('projectNumber');
+            const projectNumber = parseInt(core.getInput('projectNumber'));
             const owner = core.getInput('owner');
             const repository = core.getInput('repository');
             const username = core.getInput('username');
@@ -61,15 +60,15 @@ function run() {
             // Create the Octokit client
             const octokit = github.getOctokit(core.getInput('token'));
             // Get the project's global ID
-            const projectId = yield (0, utils_1.getNodeId)(utils_1.TYPES.PROJECT, owner, repository, projectNumber);
+            const projectId = yield (0, utils_1.getNodeId)(utils_1.TYPES.PROJECT, owner, repository, projectNumber, projectNumber);
             core.info(`Project ID: ${projectId}`);
             // Get the user's global ID
-            const userId = yield (0, utils_1.getNodeId)(utils_1.TYPES.USER, owner, repository, username);
+            const userId = yield (0, utils_1.getNodeId)(utils_1.TYPES.USER, owner, repository, projectNumber, username);
             core.info(`User ID: ${userId}`);
             // New issue created
             const issueNumber = context.issue.number;
             // Get the issue's global ID
-            const issueId = yield (0, utils_1.getNodeId)(utils_1.TYPES.ISSUE, owner, repository, issueNumber);
+            const issueId = yield (0, utils_1.getNodeId)(utils_1.TYPES.ISSUE, owner, repository, projectNumber, issueNumber);
             core.info(`Issue ID: ${issueId}`);
             // Add it to the project
             response = yield octokit.graphql({
@@ -95,8 +94,8 @@ function run() {
             core.info(`Item ID: ${itemId}`);
             // Get the Inbox column ID
             // This is an option in the `Status` single-select field option
-            const fieldId = yield (0, utils_1.getNodeId)(utils_1.TYPES.FIELD, owner, repository, projectNumber);
-            const optionId = yield (0, utils_1.getNodeId)(utils_1.TYPES.OPTION, owner, repository, 'Inbox');
+            const fieldId = yield (0, utils_1.getNodeId)(utils_1.TYPES.FIELD, owner, repository, projectNumber, projectNumber);
+            const optionId = yield (0, utils_1.getNodeId)(utils_1.TYPES.OPTION, owner, repository, projectNumber, 'Inbox');
             core.info(`Status Field ID: ${fieldId}`);
             core.info(`Status Option ID: ${optionId}`);
             // Move the item to the Inbox column
@@ -195,7 +194,7 @@ const octokit = github.getOctokit(core.getInput('token'));
  * @param {TYPES} type - The type of the node
  * @param {string} id - The ID of the node
  */
-function getNodeId(type, owner, repository, id) {
+function getNodeId(type, owner, repository, projectNumber, id) {
     return __awaiter(this, void 0, void 0, function* () {
         let response;
         core.info(`Getting ID for ${type} ${id}...`);
@@ -205,16 +204,16 @@ function getNodeId(type, owner, repository, id) {
                 // Get the ProjectV2 ID from the GraphQL API
                 response = yield octokit.graphql({
                     query: `
-          query ($owner: String!, $id: Int!) {
+          query ($owner: String!, $projectNumber: Int!) {
             organization(login: $owner) {
-              projectV2(number: $id) {
+              projectV2(number: $projectNumber) {
                 id
               }
             }
           }
         `,
                     owner,
-                    id: typeof id === 'string' ? parseInt(id) : id
+                    projectNumber
                 });
                 if (response.errors) {
                     core.error(response.errors);
@@ -237,9 +236,9 @@ function getNodeId(type, owner, repository, id) {
                 // Get the field's global ID from the GraphQL API
                 response = yield octokit.graphql({
                     query: `
-          query ($owner: String!, $id: Int!) {
+          query ($owner: String!, $projectNumber: Int!) {
             organization(login: $owner) {
-              projectV2(number: $id) {
+              projectV2(number: $projectNumber) {
                 field(name: "Status") {
                   ... on ProjectV2SingleSelectField {
                     id
@@ -250,7 +249,7 @@ function getNodeId(type, owner, repository, id) {
           }
         `,
                     owner,
-                    id: typeof id === 'string' ? parseInt(id) : id
+                    projectNumber
                 });
                 if (response.errors) {
                     core.error(response.errors);
@@ -261,9 +260,9 @@ function getNodeId(type, owner, repository, id) {
                 // Get the options's global ID from the GraphQL API
                 response = yield octokit.graphql({
                     query: `
-          query ($owner: String!, $id: Int!) {
+          query ($owner: String!, $projectNumber: Int!) {
             organization(login: $owner) {
-              projectV2(number: $id) {
+              projectV2(number: $projectNumber) {
                 field(name: "Status") {
                   ... on ProjectV2SingleSelectField {
                     options {
@@ -277,7 +276,7 @@ function getNodeId(type, owner, repository, id) {
           }
         `,
                     owner,
-                    id: typeof id === 'string' ? parseInt(id) : id
+                    projectNumber
                 });
                 if (response.errors) {
                     core.error(response.errors);

@@ -7,10 +7,8 @@ async function run(): Promise<void> {
   let response: any
 
   try {
-    core.info(JSON.stringify(github.context.payload))
-
     // Get the action inputs
-    const projectNumber = core.getInput('projectNumber')
+    const projectNumber = parseInt(core.getInput('projectNumber'))
     const owner = core.getInput('owner')
     const repository = core.getInput('repository')
     const username = core.getInput('username')
@@ -31,19 +29,32 @@ async function run(): Promise<void> {
       TYPES.PROJECT,
       owner,
       repository,
+      projectNumber,
       projectNumber
     )
     core.info(`Project ID: ${projectId}`)
 
     // Get the user's global ID
-    const userId = await getNodeId(TYPES.USER, owner, repository, username)
+    const userId = await getNodeId(
+      TYPES.USER,
+      owner,
+      repository,
+      projectNumber,
+      username
+    )
     core.info(`User ID: ${userId}`)
 
     // New issue created
     const issueNumber = context.issue.number
 
     // Get the issue's global ID
-    const issueId = await getNodeId(TYPES.ISSUE, owner, repository, issueNumber)
+    const issueId = await getNodeId(
+      TYPES.ISSUE,
+      owner,
+      repository,
+      projectNumber,
+      issueNumber
+    )
     core.info(`Issue ID: ${issueId}`)
 
     // Add it to the project
@@ -77,9 +88,16 @@ async function run(): Promise<void> {
       TYPES.FIELD,
       owner,
       repository,
+      projectNumber,
       projectNumber
     )
-    const optionId = await getNodeId(TYPES.OPTION, owner, repository, 'Inbox')
+    const optionId = await getNodeId(
+      TYPES.OPTION,
+      owner,
+      repository,
+      projectNumber,
+      'Inbox'
+    )
     core.info(`Status Field ID: ${fieldId}`)
     core.info(`Status Option ID: ${optionId}`)
 
